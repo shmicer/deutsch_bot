@@ -1,0 +1,10 @@
+pillow==10.1.0
+setuptools==69.0.2
+aiogram==3.2.0
+requests==2.31.0
+envparse==0.2.0
+pytest==7.4.3
+pymongo[srv]
+httpx==0.25.1
+flake8==6.1.0
+pandas==2.1.4
