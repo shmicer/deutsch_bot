@@ -9,15 +9,14 @@ services:
     env_file:
       - ./.env
     container_name: "deutch_bot"
-    restart: always
+    restart: unless-stopped
     volumes:
       - ./:/app
     links:
       - mongo_db
     depends_on:
       - mongo_db
-    networks:
-      - bot_network
+
 
   mongo_db:
     image: mongo
@@ -26,9 +25,5 @@ services:
       - "27017:27017"
     volumes:
       - ./mongo_data:/data/db
-    restart: always
-    networks:
-      - bot_network
+    restart: unless-stopped
 
-networks:
-    bot_network:
