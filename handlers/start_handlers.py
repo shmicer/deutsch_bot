@@ -1,11 +1,6 @@
-import time
-
 from aiogram import Router, types, F
 from aiogram.filters import Command
-from config import keyboards as kb
-from pymongo import MongoClient
-
-from config.database import search_or_save_user, users
+from keyboards import keyboards as kb
 
 router = Router()
 
