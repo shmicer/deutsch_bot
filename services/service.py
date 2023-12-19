@@ -1,6 +1,6 @@
 import csv
-from config import bot_config
 
+from config import bot_config
 
 # def read_csv(file_path):
 #     word_dict = {}
@@ -13,4 +13,3 @@ from config import bot_config
 #
 #
 # training_dict = read_csv(file_path=bot_config.CSV_FILE_PATH)
-
