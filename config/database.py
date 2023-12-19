@@ -1,6 +1,6 @@
+import pandas as pd
 from envparse import Env
 from pymongo import MongoClient
-import pandas as pd
 
 env = Env()
 

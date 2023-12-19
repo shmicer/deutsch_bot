@@ -7,4 +7,6 @@ pytest==7.4.3
 pymongo[srv]
 httpx==0.25.1
 flake8==6.1.0
+pylint==3.0.3
+isort==5.13.2
 pandas==2.1.4

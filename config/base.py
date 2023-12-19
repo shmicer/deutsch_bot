@@ -36,4 +36,4 @@ try:
         data_collection.insert_many(data_dict)
 
 except Exception as e:
-    print(f"Произошла ошибка: {e}")
+    print(f'Произошла ошибка: {e}')
