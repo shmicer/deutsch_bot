@@ -1,55 +1,59 @@
-import asyncio
 import random
 from aiogram import Router, types, F
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
 
-from config.database import data_collection
-from config import keyboards as kb
-from handlers.start_handlers import cmd_start
+from keyboards import keyboards as kb
+from keyboards.keyboards_functions import make_keyboard
+from config.constants import WORDS
+from trainers.trainer import Trainer
 
 router = Router()
 
-user_progress = {}
+
+class TrainingState(StatesGroup):
+    CHOOSING = State()
 
 
-class AnswerQuestion(StatesGroup):
-    choosing_answer = State()
-
-
-@router.message(F.text.lower() == "тренировка")
-@router.message(F.text.lower() == "повторить")
-async def start_training(message: types.Message):
+@router.message(F.text.lower() == "тренировка" or F.text.lower() == "повторить")
+async def start_training(message: types.Message, state: FSMContext):
     user_id = message.from_user.id
     num_words_to_learn = 5
-    words_to_learn = random.sample(list(data_collection.find()), k=num_words_to_learn)
-    user_progress[user_id] = {"words_to_learn": words_to_learn, "current_word_index": 0}
-    current_word = words_to_learn[0]['word']
+    words_to_learn = random.sample(WORDS, k=num_words_to_learn)
+    training_instance = Trainer(user_id, words_to_learn)
+    await state.set_state(TrainingState.CHOOSING)
+    await state.update_data(training_instance=training_instance)
 
-    await message.answer(f"Переведите слово: {current_word}")
+    await show_next_word(message, state)
 
 
-@router.message(lambda message: message.text)
-async def handle_answer(message: types.Message):
-    user_id = message.from_user.id
-
-    words_to_learn = user_progress.get(user_id, {}).get("words_to_learn")
-    current_word_index = user_progress.get(user_id, {}).get("current_word_index")
-    current_translation = words_to_learn[current_word_index]['translate'].lower()
+@router.message(TrainingState.CHOOSING, lambda message: message.text)
+async def handle_answer(message: types.Message, state: FSMContext):
+    data = await state.get_data()
+    training_instance: Trainer = data['training_instance']
     user_answer = message.text.lower()
-    if current_word_index < len(words_to_learn):
 
-        if user_answer == current_translation:
-            await message.answer(f"Правильно")
-        else:
-            await message.reply(f"Неправильно. Правильный ответ: {current_translation}")
-        current_word_index += 1
-        if current_word_index < len(words_to_learn):
-            await message.answer(f"Следующее слово: {words_to_learn[current_word_index]['word']}")
-        else:
-            await finish_training(message)
-        user_progress[user_id]["current_word_index"] = current_word_index
+    if training_instance.check_answer(user_answer):
+        await message.reply("Правильно!")
+    else:
+        correct_translation = training_instance.get_current_word()['translate']
+        await message.reply(f"Неправильно. Правильный ответ: {correct_translation}")
+
+    training_instance.current_word_index += 1
+    if training_instance.current_word_index < len(training_instance.words_to_learn):
+        await show_next_word(message, state)
+    else:
+        await finish_training(message, state)
 
 
-async def finish_training(message: types.Message):
+async def show_next_word(message: types.Message, state: FSMContext):
+    data = await state.get_data()
+    training_instance: Trainer = data['training_instance']
+    current_word = training_instance.get_current_word()['word']
+    current_translation = training_instance.get_current_translation()
+    await message.answer(f"Переведите слово: {current_word}", reply_markup=make_keyboard(current_translation))
+
+
+async def finish_training(message: types.Message, state: FSMContext):
     await message.answer("Повторить тренировку?", reply_markup=kb.FINISH_KEYBOARD)
+    await state.clear()

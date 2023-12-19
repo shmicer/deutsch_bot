@@ -17,4 +17,3 @@ FINISH_KEYBOARD = ReplyKeyboardMarkup(
     resize_keyboard=True,
 )
 
-
