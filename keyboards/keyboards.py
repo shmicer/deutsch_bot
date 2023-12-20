@@ -16,3 +16,10 @@ FINISH_KEYBOARD = ReplyKeyboardMarkup(
     resize_keyboard=True,
 )
 
+TRANSLATE_DIRECTION_KEYBOARD = ReplyKeyboardMarkup(
+    keyboard=[
+        [KeyboardButton(text='DE-RU')],
+        [KeyboardButton(text='RU-DE')],
+    ],
+    resize_keyboard=True,
+)
